@@ -1,1 +1,1 @@
-# Basic-Load-Tester
+# One Class Load Tester

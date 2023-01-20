@@ -15,7 +15,7 @@ The core concept is the "test group" and inside each group is each bunch of requ
 
 See the example below for a more clear picture.
 
-### CycleData(int Cycle, int Requests, int Delay)
+### public record TestGroup(List<Task> TestTasks, int PostTestDelay)
 
 ```csharp
 public record TestGroup(List<Task> TestTasks, int PostTestDelay);

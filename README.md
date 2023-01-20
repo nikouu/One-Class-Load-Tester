@@ -11,52 +11,24 @@ I needed a really quick and dirty load tester and I wasn't in a position to clon
 
 ## How does it work?
 
-The core concept is the "test cycle". Each test cycle will depend on a `CycleData` object to outline how many requests are to be sent that cycle and the delay until the next cycle. This allows us to have a more fine grained approach. Note that if we are on a cycle that isn't explicitly outlined by a `CycleData` entry, it will effectively use the previous `CycleData` entry until we're at a cycle that corresponds to a newer `CycleData` value. 
+The core concept is the "test group" and inside each group is each bunch of requests you're looking to fire at once. Plus a test group has what value of delay to wait before the next bunch of requests. For example, let's say you wanted to do 5 requests every 2 seconds. This is two test groups with five tasks in each, with the delay set to 2000ms. 
 
 See the example below for a more clear picture.
 
 ### CycleData(int Cycle, int Requests, int Delay)
 
 ```csharp
-readonly record struct CycleData(int Cycle, int Requests, int Delay);
+public record TestGroup(List<Task> TestTasks, int PostTestDelay);
 ```
 
 Where:
-| Parameter  | Usage                                                 |
-| ---------- | ----------------------------------------------------- |
-| `Cycle`    | The cycle this `CycleData` corresponds to.            |
-| `Requests` | How many requests should get sent out for this cycle. |
-| `Delay`    | The delay in milliseconds before the next cycle.      |
+| Parameter       | Usage                                                                          |
+| --------------- | ------------------------------------------------------------------------------ |
+| `TestTasks`     | All the request to be made per test group. A list of normal C# `Task` objects. |
+| `PostTestDelay` | The delay in milliseconds before the next test group.                          |
+
 
 Note: The final delay actually doesn't matter as the code will end after the delay value. 
-
-### Number of cycles
-
-The number of cycles is determined by the highest value of `Cycle` in the list of `CycleData` objects.
-
-
-### Example
-
-A much easier to digest example:
-
-```csharp
-var requestsPerCycleMapping = new List<CycleData>()
-{
-    new CycleData(1, 5, 1000),
-    new CycleData(3, 10, 500),
-    new CycleData(5, 15, 300),
-}.OrderBy(x => x.Cycle);
-```
-
-Above is the setup and where the `CycleData` objects are defined. Meaning for this we will have five total cycles, which will look like:
-
-| Cycle | Requests | Delay  |
-| ----- | -------- | ------ |
-| 1     | 5        | 1000ms |
-| 2     | 5        | 1000ms |
-| 3     | 10       | 500    |
-| 4     | 10       | 500    |
-| 5     | 15       | 300    |
 
 ## Test Server
 
@@ -65,3 +37,5 @@ With this solution is a test server which is a simple minimal API project to hel
 ## What about tokens, query strings, tokens, mTLS certificates?
 
 With the raw `HttpClient` object sitting there, you should be able to quickly attach anything else you need in the same way you probably have done it in your normal project.
+
+With limitations of `HttpClient` around things like headers, you may want to create an `HttpClient` object as per what you need and add it to `TestGroup` or create an object to represent TestTasks which has the `Task` and anything else you need to run your test for each run. 

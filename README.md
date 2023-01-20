@@ -11,6 +11,8 @@ I needed a really quick and dirty load tester and I wasn't in a position to clon
 
 ## How does it work?
 
+All the magic is in `LoadTestEngine.cs`.
+
 The core concept is the "test group" and inside each group is each bunch of requests you're looking to fire at once. Plus a test group has what value of delay to wait before the next bunch of requests. For example, let's say you wanted to do 5 requests every 2 seconds. This is two test groups with five tasks in each, with the delay set to 2000ms. 
 
 See the example below for a more clear picture.
